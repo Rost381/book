@@ -95,7 +95,7 @@ class BooksApiTestCase(APITestCase):
         '''
         self.test_setUP()
         self.user = User.objects.create(username='test_username2')
-        print('Проверка  возможности   создания')
+        print('------------- Проверка  возможности   создания---------')
         self.assertEqual(4, Book.objects.all().count())
         url = reverse('book-list')
         data = {
@@ -258,6 +258,7 @@ class BooksRelationTestCase(APITestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         relation = UserBookRelation.objects.get(user=self.user,
                                                 book=self.book1)
+        print(relation)
         self.assertEqual(5, relation.rate)
 
     def test_rate_wrong(self):
@@ -273,5 +274,7 @@ class BooksRelationTestCase(APITestCase):
         self.client.force_login(self.user)
         response = self.client.patch(url, data=json_data,
                                      content_type='application/json')
-
+        print('url: ', url)
+        print('json_data:', json_data)
+        print('response: ', response)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)

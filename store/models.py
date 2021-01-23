@@ -40,4 +40,6 @@ class UserBookRelation(models.Model):
         verbose_name_plural = 'Лайки, закладки, рейтинг'
 
     def __str__(self):
-        return f'{self.user.username}: {self.book.name},  RATE {self.rate}'
+        return f'{self.user.username}: {self.book.name}, Like: {self.like}, ' \
+               f' in_bookmarks {self.in_bookmarks}, RATE: {self.rate}'
+

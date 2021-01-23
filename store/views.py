@@ -35,6 +35,17 @@ class UserBookRelationView(UpdateModelMixin, GenericViewSet):
                                                         book_id=self.kwargs['book'])
         return obj
 
+
+class UserBookRelationStatisticView(ModelViewSet):
+    queryset = UserBookRelation.objects.all()
+    serializer_class = UserBookRelationSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
+    permission_classes = [IsOwnerOrStaffOrReadOnly]
+    filter_fields = ['book', 'user']
+    search_fields = ['book', 'user']
+    ordering_field = ['book', 'user']
+
+
 def perform_create(self, serializer):
     serializer.validated_data['owner'] = self.request.user
     serializer.save()
