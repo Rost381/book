@@ -278,3 +278,4 @@ class BooksRelationTestCase(APITestCase):
         print('json_data:', json_data)
         print('response: ', response)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+

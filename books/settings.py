@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'social_django',
 
     'store.apps.StoreConfig',
+
 ]
 
 MIDDLEWARE = [

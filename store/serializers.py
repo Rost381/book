@@ -11,5 +11,4 @@ class BookSerializer(ModelSerializer):
 class UserBookRelationSerializer(ModelSerializer):
     class Meta:
         model = UserBookRelation
-        #fields = ('book', 'like', 'in_bookmarks', 'rate')
-        fields = '__all__'
+        fields = fields = '__all__'

@@ -11,8 +11,7 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from store.models import Book, UserBookRelation
 from store.permissions import IsOwnerOrStaffOrReadOnly
-from store.serializers import BookSerializer, UserBookRelationSerializer
-
+from store.serializers import BookSerializer, UserBookRelationSerializer\
 
 class BookViewSet(ModelViewSet):
     queryset = Book.objects.all()
@@ -24,26 +23,35 @@ class BookViewSet(ModelViewSet):
     ordering_field = ['price', 'author_name']
 
 
-class UserBookRelationView(UpdateModelMixin, GenericViewSet):
+
+class UserBookRelationView(ModelViewSet, UpdateModelMixin, GenericViewSet):
     permission_classes = [IsAuthenticated]
     queryset = UserBookRelation.objects.all()
     serializer_class = UserBookRelationSerializer
-    lookup_field = 'book'
-
-    def get_object(self):
-        obj, created = UserBookRelation.objects.get_or_create(user=self.request.user,
-                                                        book_id=self.kwargs['book'])
-        return obj
-
-
-class UserBookRelationStatisticView(ModelViewSet):
-    queryset = UserBookRelation.objects.all()
-    serializer_class = UserBookRelationSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
-    permission_classes = [IsOwnerOrStaffOrReadOnly]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filter_fields = ['book', 'user']
     search_fields = ['book', 'user']
     ordering_field = ['book', 'user']
+
+    lookup_field = 'book'
+
+    def mean_rate(self):
+        booksrelation = UserBookRelation.objects.filter(book=self.kwargs['book'])
+        miean_rate = 0
+        print(booksrelation)
+        for book in booksrelation:
+            miean_rate += book.rate
+        print(miean_rate/len(booksrelation))
+        queryset = Book.objects.get(pk=self.kwargs['book'])
+        print(queryset)
+
+    def get_object(self):
+
+        obj, created = UserBookRelation.objects.get_or_create(user=self.request.user,
+                                                        book_id=self.kwargs['book'])
+        self.mean_rate()
+        return obj
+
 
 
 def perform_create(self, serializer):
@@ -54,3 +62,4 @@ def perform_create(self, serializer):
 #@csrf_exempt
 def auth(request):
     return render(request, 'oauth.html', {})
+

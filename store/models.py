@@ -43,3 +43,5 @@ class UserBookRelation(models.Model):
         return f'{self.user.username}: {self.book.name}, Like: {self.like}, ' \
                f' in_bookmarks {self.in_bookmarks}, RATE: {self.rate}'
 
+
+
