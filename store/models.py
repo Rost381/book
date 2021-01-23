@@ -1,8 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-
 # Create your models here.
-
 
 
 class Book(models.Model):
@@ -12,11 +10,15 @@ class Book(models.Model):
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
                               related_name='my_books')
     readers = models.ManyToManyField(User, through='UserBookRelation',
-                                     related_name='books'  )
+                                     related_name='books')
+    class Meta:
+        verbose_name = 'Книги'
+        verbose_name_plural = 'Книги'
     
     def __str__(self):
         return f'Id: {self.id} {self.name},  {self.author_name}, Владелец: {self.owner}' \
                f' Цена: {self.price}'
+
 
 class UserBookRelation(models.Model):
     RATE_CHOICES = (
@@ -31,8 +33,11 @@ class UserBookRelation(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     like = models.BooleanField(default=False)
     in_bookmarks = models.BooleanField(default=False)
-    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES)
+    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
+
+    class Meta:
+        verbose_name = 'Лайки, закладки, рейтинг'
+        verbose_name_plural = 'Лайки, закладки, рейтинг'
 
     def __str__(self):
         return f'{self.user.username}: {self.book.name},  RATE {self.rate}'
-

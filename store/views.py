@@ -30,10 +30,14 @@ class UserBookRelationView(UpdateModelMixin, GenericViewSet):
     serializer_class = UserBookRelationSerializer
     lookup_field = 'book'
 
+    def get_object(self):
+        obj, created = UserBookRelation.objects.get_or_create(user=self.request.user,
+                                                        book_id=self.kwargs['book'])
+        return obj
 
-    def perform_create(self, serializer):
-        serializer.validated_data['owner'] = self.request.user
-        serializer.save()
+def perform_create(self, serializer):
+    serializer.validated_data['owner'] = self.request.user
+    serializer.save()
 
 
 #@csrf_exempt
