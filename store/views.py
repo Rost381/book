@@ -13,15 +13,15 @@ from store.models import Book, UserBookRelation
 from store.permissions import IsOwnerOrStaffOrReadOnly
 from store.serializers import BookSerializer, UserBookRelationSerializer\
 
+
 class BookViewSet(ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     permission_classes = [IsOwnerOrStaffOrReadOnly]
     filter_fields = ['price']
     search_fields = ['name', 'author_name']
     ordering_field = ['price', 'author_name']
-
 
 
 class UserBookRelationView(ModelViewSet, UpdateModelMixin, GenericViewSet):
@@ -36,21 +36,46 @@ class UserBookRelationView(ModelViewSet, UpdateModelMixin, GenericViewSet):
     lookup_field = 'book'
 
     def mean_rate(self):
-        booksrelation = UserBookRelation.objects.filter(book=self.kwargs['book'])
-        miean_rate = 0
-        print(booksrelation)
-        for book in booksrelation:
-            miean_rate += book.rate
-        print(miean_rate/len(booksrelation))
+        '''
+        Calculate mean rate
+        '''
+        books_relation = UserBookRelation.objects.filter(book=self.kwargs['book'])
+        mean_rate = 0
+        print(books_relation)
+        for book in books_relation:
+            mean_rate += book.rate
+        print(mean_rate/len(books_relation))
         queryset = Book.objects.get(pk=self.kwargs['book'])
         print(queryset)
+        # TODO Записать в поле BOOK
+
+    def sum_likes(self):
+        '''
+        Calculate summary likes
+        '''
+        likes_relation = UserBookRelation.objects.filter(book=self.kwargs['book'])
+        likes_rate = 0
+        print(likes_relation)
+        for book in likes_relation:
+            if (book.like):
+                likes_rate+= 1
+        print(likes_rate)
+        queryset = Book.objects.get(pk=self.kwargs['book'])
+        print(self.request.method)
+        print(self.request.data)
+        #TODO Записать в поле BOOK
+
 
     def get_object(self):
 
         obj, created = UserBookRelation.objects.get_or_create(user=self.request.user,
                                                         book_id=self.kwargs['book'])
-        self.mean_rate()
-        return obj
+       #Расчитыват средний рейтинг и общин лайки
+        # if 'rate' in self.request.data:
+        #     self.mean_rate()
+        # elif 'like' in self.request.data:
+        #     self.sum_likes()
+        # return obj
 
 
 
