@@ -1,3 +1,4 @@
+from django.db.models import Count, When, Case, Avg, F
 from django.shortcuts import render
 
 # Create your views here.
@@ -15,16 +16,23 @@ from store.serializers import BookSerializer, UserBookRelationSerializer\
 
 
 class BookViewSet(ModelViewSet):
-    queryset = Book.objects.all()
+    permission_classes = [IsOwnerOrStaffOrReadOnly]
+    queryset = Book.objects.all().annotate(annotated_likes=Count(Case#В случае
+                                                                  (When #Когда
+                                                                   (userbookrelation__like=True,
+                                                                    then=1 #Возвращаем 1
+                                                                    ))),
+                                        rating = Avg('userbookrelation__rate'),#Avg -среднее
+                                        discount_price=F('price') - ((F('discount')) * (F('price')) / 100)
+                                             ).order_by('id') #Сортируем
     serializer_class = BookSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    permission_classes = [IsOwnerOrStaffOrReadOnly]
     filter_fields = ['price']
     search_fields = ['name', 'author_name']
     ordering_field = ['price', 'author_name']
 
 
-class UserBookRelationView(ModelViewSet, UpdateModelMixin, GenericViewSet):
+class UserBookRelationView(ModelViewSet): #, UpdateModelMixin, GenericViewSet):
     permission_classes = [IsAuthenticated]
     queryset = UserBookRelation.objects.all()
     serializer_class = UserBookRelationSerializer
@@ -32,50 +40,51 @@ class UserBookRelationView(ModelViewSet, UpdateModelMixin, GenericViewSet):
     filter_fields = ['book', 'user']
     search_fields = ['book', 'user']
     ordering_field = ['book', 'user']
-
+    #№ Для того, что бы передать вместо ID Relation ID Книги
     lookup_field = 'book'
-
-    def mean_rate(self):
-        '''
-        Calculate mean rate
-        '''
-        books_relation = UserBookRelation.objects.filter(book=self.kwargs['book'])
-        mean_rate = 0
-        print(books_relation)
-        for book in books_relation:
-            mean_rate += book.rate
-        print(mean_rate/len(books_relation))
-        queryset = Book.objects.get(pk=self.kwargs['book'])
-        print(queryset)
-        # TODO Записать в поле BOOK
-
-    def sum_likes(self):
-        '''
-        Calculate summary likes
-        '''
-        likes_relation = UserBookRelation.objects.filter(book=self.kwargs['book'])
-        likes_rate = 0
-        print(likes_relation)
-        for book in likes_relation:
-            if (book.like):
-                likes_rate+= 1
-        print(likes_rate)
-        queryset = Book.objects.get(pk=self.kwargs['book'])
-        print(self.request.method)
-        print(self.request.data)
-        #TODO Записать в поле BOOK
+    #
+    # def mean_rate(self):
+    #     '''
+    #     Calculate mean rate
+    #     '''
+    #     books_relation = UserBookRelation.objects.filter(book=self.kwargs['book'])
+    #     mean_rate = 0
+    #     print(books_relation)
+    #     for book in books_relation:
+    #         mean_rate += book.rate
+    #     print(mean_rate/len(books_relation))
+    #     queryset = Book.objects.get(pk=self.kwargs['book'])
+    #     print(queryset.price)
+    #     # TODO Записать в поле BOOK
+    #
+    # def sum_likes(self):
+    #     '''
+    #     Calculate summary likes
+    #     '''
+    #
+    #     likes_relation = UserBookRelation.objects.filter(book=self.kwargs['book'])
+    #     likes_rate = 0
+    #     print(likes_relation)
+    #     for book in likes_relation:
+    #         if (book.like):
+    #             likes_rate+= 1
+    #     print(likes_rate)
+    #     queryset = Book.objects.get(pk=self.kwargs['book'])
+    #     print(self.request.method)
+    #     print(self.request.data)
+    #     #TODO Записать в поле BOOK
 
 
     def get_object(self):
-
+    # book_id=self.kwargs['book'] приходит из lookup_field = 'book' -эо ID Книги
         obj, created = UserBookRelation.objects.get_or_create(user=self.request.user,
                                                         book_id=self.kwargs['book'])
-       #Расчитыват средний рейтинг и общин лайки
-        # if 'rate' in self.request.data:
-        #     self.mean_rate()
-        # elif 'like' in self.request.data:
-        #     self.sum_likes()
-        # return obj
+       # Расчитыват средний рейтинг и общин лайки
+       #  if 'rate' in self.request.data:
+       #      self.mean_rate()
+       #  elif 'like' in self.request.data:
+       #      self.sum_likes()
+        return obj
 
 
 

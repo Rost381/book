@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.models import User
+from django.db.models import Count, Case, When
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
@@ -35,11 +36,15 @@ class BooksApiTestCase(APITestCase):
         url = reverse('book-list')
         print(url)
         response = self.client.get(url)
-        print('response: ',response)
-        print('response.data: ',response.data)
+        books= Book.objects.all().annotate(annotated_likes=Count(Case#В случае
+                                                                  (When #Когда
+                                                                   (userbookrelation__like=True,
+                                                                    then=1 #Возвращаем 1
+                                                                    )))).order_by('id') #Сортируем
+        # print('response: ',response)
+        # print('response.data: ',response.data)
         #print(self.book1, self.book2,)
-        serializer_data = BookSerializer([self.book1, self.book2,
-                                          self.book3,self.book4], many = True).data
+        serializer_data = BookSerializer(books, many = True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
 
@@ -49,12 +54,13 @@ class BooksApiTestCase(APITestCase):
         '''
         self.test_setUP()
         url = reverse('book-list')
-        # print(url)
         response = self.client.get(url,data = {'price' : 55})
-        # print('response: ',response)
-        # print('response.data: ',response.data)
-        #print(self.book1, self.book2,)
-        serializer_data = BookSerializer([self.book2, self.book3], many = True).data
+        books= Book.objects.filter(id__in=[self.book2.id, self.book3.id ]).annotate(annotated_likes=Count(Case#В случае
+                                                                  (When #Когда
+                                                                   (userbookrelation__like=True,
+                                                                    then=1 #Возвращаем 1
+                                                                    )))).order_by('id') #Сортируем
+        serializer_data = BookSerializer(books, many = True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
 
@@ -66,10 +72,12 @@ class BooksApiTestCase(APITestCase):
         url = reverse('book-list')
         # print(url)
         response = self.client.get(url,data = {'search' :'Author 1'})
-        # print('response: ',response)
-        # print('response.data: ',response.data)
-        #print(self.book1, self.book2,)
-        serializer_data = BookSerializer([self.book1, self.book3], many = True).data
+        books= Book.objects.filter(id__in=[self.book1.id, self.book3.id ]).annotate(annotated_likes=Count(Case#В случае
+                                                                  (When #Когда
+                                                                   (userbookrelation__like=True,
+                                                                    then=1 #Возвращаем 1
+                                                                    )))).order_by('id') #Сортируем
+        serializer_data = BookSerializer(books, many = True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
 
@@ -81,11 +89,12 @@ class BooksApiTestCase(APITestCase):
         url = reverse('book-list')
         # print(url)
         response = self.client.get(url,data = {'ordering' :'price'})
-        # print('response: ',response)
-        # print('response.data: ',response.data)
-        #print(self.book1, self.book2,)
-        serializer_data = BookSerializer([self.book1,self.book4,
-                                          self.book2, self.book3], many = True).data
+        books = Book.objects.all().annotate(annotated_likes=Count(Case  # В случае
+                                                                  (When  # Когда
+                                                                   (userbookrelation__like=True,
+                                                                    then=1  # Возвращаем 1
+                                                                    )))).order_by('id')  # Сортируем
+        serializer_data = BookSerializer(books, many = True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
 
@@ -102,11 +111,12 @@ class BooksApiTestCase(APITestCase):
     "name": "Programming in Python 3",
     "price": "150.00",
     "author_name": "Mark Sommerfeld-Junior",
+    "owner" : self.user.id
         }
         json_data = json.dumps(data)
-        #self.client.force_login(self.user)
-        print('url',url)
-        print('self.user', self.user)
+        self.client.force_login(self.user)
+        print(self.user.username)
+        print('self.user.id', self.user.id)
         response = self.client.post(url, data=json_data,
                                    content_type='application/json')
 
@@ -117,6 +127,34 @@ class BooksApiTestCase(APITestCase):
         self.assertEqual(5, Book.objects.all().count())
         self.assertEqual(self.user, Book.objects.last().owner)
 
+        def test_create(self):
+            '''
+            Проверка возможности создания
+            '''
+            self.test_setUP()
+            self.user = User.objects.create(username='test_username2')
+            print('------------- Проверка  возможности   создания---------')
+            self.assertEqual(4, Book.objects.all().count())
+            url = reverse('book-list')
+            data = {
+                "name": "Programming in Python 3",
+                "price": "150.00",
+                "author_name": "Mark Sommerfeld-Junior",
+                "owner": self.user.id
+            }
+            json_data = json.dumps(data)
+            # self.client.force_login(self.user)
+            print(self.user.username)
+            print('self.user.id', self.user.id)
+            response = self.client.post(url, data=json_data,
+                                        content_type='application/json')
+
+            print('response: ', response)
+            print('Book.objects.all(): ', Book.objects.all())
+
+            self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+            self.assertEqual(5, Book.objects.all().count())
+            self.assertEqual(self.user, Book.objects.last().owner)
 
 
     def test_update(self):
@@ -279,3 +317,45 @@ class BooksRelationTestCase(APITestCase):
         print('response: ', response)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
+class BookSerializerTestCase(APITestCase):
+
+    def test_ok(self):
+        self.user_1 = User.objects.create(username='user_1')
+        self.user_2 = User.objects.create(username='user_2')
+        self.user_3 = User.objects.create(username='user_3')
+
+        self.book_1 = Book.objects.create(name='Test book1', price=25,
+                                         author_name='Author 1')
+        self.book_2 = Book.objects.create(name='Test book2', price=55,
+                                         author_name='Author 5')
+
+        UserBookRelation.objects.create(user=self.user_1, book=self.book_1, like =True)
+        UserBookRelation.objects.create(user=self.user_2, book=self.book_1, like=True)
+        UserBookRelation.objects.create(user=self.user_3, book=self.book_1, like=True)
+
+        UserBookRelation.objects.create(user=self.user_1, book=self.book_2, like =True)
+        UserBookRelation.objects.create(user=self.user_2, book=self.book_2, like=True)
+        UserBookRelation.objects.create(user=self.user_3, book=self.book_2, like=False)
+
+
+        data = BookSerializer([self.book_1, self.book_2], many=True).data
+        print(data)
+        expected_data= [
+                                {
+                                'Id': self.book_1.id,
+                                'name': 'Test book1',
+                                'price': '25.00',
+                                'author_name': 'Author 1',
+                                'likes_count' : 3
+                                },
+                                {
+                                'id': self.book_2.id,
+                                'name': 'Test book2',
+                                'price': '55.00',
+                                'author_name': 'Author 5',
+                                'likes_count': 2
+                                }
+
+                                ]
+        json_data = json.dumps(expected_data)
+        self.assertEqual(data, data)

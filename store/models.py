@@ -7,20 +7,31 @@ class Book(models.Model):
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=7, decimal_places=2)
     author_name = models.CharField(max_length=255)
+    # Владелец related_name -
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
                               related_name='my_books')
+
+   #Читатель through UserBookRelation- Через какую модель идет связь ManyToManyField
+    #У читателя есть книгИ, у книги есть читателИ
     readers = models.ManyToManyField(User, through='UserBookRelation',
                                      related_name='books')
+    discount =models.DecimalField(max_digits=2, decimal_places=0, null=True)
+
+
     class Meta:
         verbose_name = 'Книги'
         verbose_name_plural = 'Книги'
     
     def __str__(self):
         return f'Id: {self.id} {self.name},  {self.author_name}, Владелец: {self.owner}' \
-               f' Цена: {self.price}'
+               f' Цена: {self.price} Скидка: {self.author_name} процентов'
 
 
 class UserBookRelation(models.Model):
+    '''
+    Промежутичная модель ManyToManyField
+    для User и Book
+    '''
     RATE_CHOICES = (
         (1, 'Ok'),
         (2, 'Fine'),
