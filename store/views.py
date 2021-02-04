@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
+from store.logic import set_rating
 from store.models import Book, UserBookRelation
 from store.permissions import IsOwnerOrStaffOrReadOnly
 from store.serializers import BookSerializer, UserBookRelationSerializer\
@@ -17,14 +18,19 @@ from store.serializers import BookSerializer, UserBookRelationSerializer\
 
 class BookViewSet(ModelViewSet):
     permission_classes = [IsOwnerOrStaffOrReadOnly]
-    queryset = Book.objects.all().annotate(annotated_likes=Count(Case#В случае
+    queryset = Book.objects.all().annotate(annotated_likes=Count(# Подсчет 1 возвращенных then=1
+                                                                Case#В случае
                                                                   (When #Когда
                                                                    (userbookrelation__like=True,
                                                                     then=1 #Возвращаем 1
                                                                     ))),
-                                        rating = Avg('userbookrelation__rate'),#Avg -среднее
-                                        discount_price=F('price') - ((F('discount')) * (F('price')) / 100)
-                                             ).order_by('id') #Сортируем
+                                       # rating = Avg('userbookrelation__rate'),#Avg -среднее
+                                        discount_price=F('price') - ((F('discount')) * (F('price')) / 100),
+                                        owner_name =F('owner__username')  #Сразу выбирает одного
+                                            # ).select_related('owner' # Выбирает ОДНОГО owner из сериалайзерп
+                    # если там owner_name = serializers.CharField(source= 'owner.username', default = "", read_only=True)
+                                                    ).prefetch_related('readers' # Выбирает ВСЕХ
+                                                             ).order_by('id') #Сортируем
     serializer_class = BookSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filter_fields = ['price']
@@ -79,9 +85,12 @@ class UserBookRelationView(ModelViewSet): #, UpdateModelMixin, GenericViewSet):
     # book_id=self.kwargs['book'] приходит из lookup_field = 'book' -эо ID Книги
         obj, created = UserBookRelation.objects.get_or_create(user=self.request.user,
                                                         book_id=self.kwargs['book'])
+        #obj.save()
+        print('get_object', self.request.data)
        # Расчитыват средний рейтинг и общин лайки
        #  if 'rate' in self.request.data:
-       #      self.mean_rate()
+       #      print("CALL VIEW ")
+       #      set_rating(book=self.kwargs['book'])
        #  elif 'like' in self.request.data:
        #      self.sum_likes()
         return obj

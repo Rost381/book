@@ -346,14 +346,14 @@ class BookSerializerTestCase(APITestCase):
                                 'name': 'Test book1',
                                 'price': '25.00',
                                 'author_name': 'Author 1',
-                                'likes_count' : 3
+                                #'likes_count' : 3
                                 },
                                 {
                                 'id': self.book_2.id,
                                 'name': 'Test book2',
                                 'price': '55.00',
                                 'author_name': 'Author 5',
-                                'likes_count': 2
+                                #'likes_count': 2
                                 }
 
                                 ]

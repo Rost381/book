@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os
 from pathlib import Path
-import mimetypes #Чтоб работала АДминка
 
+import mimetypes #Чтоб работала АДминка
 mimetypes.add_type("text/css", ".css", True)#Чтоб работала АДминка
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,18 +43,19 @@ INSTALLED_APPS = [
 
     'debug_toolbar',
     'social_django',
-
+    'corsheaders',
     'store.apps.StoreConfig',
 ]
 
-# INTERNAL_IPS = [
-#     '127.0.0.1'
-# ]
-# INTERNAL_IPS = ('127.0.0.1', )
-INTERNAL_IPS = ('127.0.0.1', '192.168.0.1',  '10.0.2.2', )
+INTERNAL_IPS = [
+    '127.0.0.1'
+]
+
 
 MIDDLEWARE = [
 
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware', # RUS
@@ -63,9 +64,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #Begin debug_toolbar
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-
-
+    'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
+    # End debug_toolbar
 ]
 
 ROOT_URLCONF = 'books.urls'
@@ -73,7 +75,10 @@ ROOT_URLCONF = 'books.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'templates',
+                 #'C:/Users/Rostislav/PycharmProjects/books/venv/Lib/site-packages/debug_toolbar/templates'
+
+    ]
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -118,7 +123,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github.GithubOAuth2',
     # 'social_core.backends.open_id.OpenIdAuth',
     # 'social_core.backends.google.GoogleOpenId',
-    # 'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
     # 'social_core.backends.google.GoogleOAuth',
     # 'social_core.backends.twitter.TwitterOAuth',
     # 'social_core.backends.yahoo.YahooOpenId',
@@ -161,8 +166,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = '/static/'
+
+
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
@@ -178,6 +186,16 @@ SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_GITHUB_KEY = '8324927f547e85516c44'
 SOCIAL_AUTH_GITHUB_SECRET = '7fe9d1960d9558b72581524cc610a645587758b3'
 
+
+
 # CSRF_USE_SESSIONS=False
 # CSRF_COOKIE_SECURE = False
 # CSRF_COOKIE_HTTPONLY = False
+
+# key=API_KEY
+# AIzaSyAcGQuQqCYwrATXVlb5vwhOZ0UoV-SV9Vw
+# OAuth
+# идентификатор клиента
+# 898552101075-s4rll0gv8hukm57a4jj3qqv3u2aq3p6q.apps.googleusercontent.com
+# Секретный код клиента
+# 5jF9Gie4yFlBDQv7QGEUwVDo
