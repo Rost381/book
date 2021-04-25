@@ -12,12 +12,12 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
-import mimetypes #Чтоб работала АДминка
-mimetypes.add_type("text/css", ".css", True)#Чтоб работала АДминка
+import mimetypes  # Чтоб работала АДминка
+
+mimetypes.add_type("text/css", ".css", True)  # Чтоб работала АДминка
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -29,7 +29,6 @@ SECRET_KEY = '*@z)lo9x3*r8@83@#!xqmtc()$&964!_o4+s1ax1#3sbygxj4y'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -44,13 +43,13 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'social_django',
     'corsheaders',
+    'django_extensions',
     'store.apps.StoreConfig',
 ]
 
 INTERNAL_IPS = [
     '127.0.0.1'
 ]
-
 
 MIDDLEWARE = [
 
@@ -64,10 +63,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #Begin debug_toolbar
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # Begin debug_toolbar
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
     # End debug_toolbar
+
 ]
 
 ROOT_URLCONF = 'books.urls'
@@ -76,9 +77,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates',
-                 #'C:/Users/Rostislav/PycharmProjects/books/venv/Lib/site-packages/debug_toolbar/templates'
+                 # 'C:/Users/Rostislav/PycharmProjects/books/venv/Lib/site-packages/debug_toolbar/templates'
 
-    ]
+                 ]
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -94,7 +95,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'books.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
@@ -105,19 +105,19 @@ WSGI_APPLICATION = 'books.wsgi.application'
 #     }
 # }
 
-#Postgres
+# Postgres
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'books_db',
         'USER': 'postgres',
-        'PASSWORD' : '2460226Rr!',
+        'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '',
     }
 }
 
-#OAuth
+# OAuth
 AUTHENTICATION_BACKENDS = (
 
     'social_core.backends.github.GithubOAuth2',
@@ -149,13 +149,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Minsk'
 
 USE_I18N = True
 
@@ -163,14 +162,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = '/static/'
-
-
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
@@ -180,13 +176,11 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     )
 }
-#OAuth
+# OAuth
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 
 SOCIAL_AUTH_GITHUB_KEY = '8324927f547e85516c44'
 SOCIAL_AUTH_GITHUB_SECRET = '7fe9d1960d9558b72581524cc610a645587758b3'
-
-
 
 # CSRF_USE_SESSIONS=False
 # CSRF_COOKIE_SECURE = False

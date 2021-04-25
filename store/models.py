@@ -3,22 +3,22 @@ from django.db import models
 # Create your models here.
 
 
-
 class Book(models.Model):
-    name = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=7, decimal_places=2)
-    author_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, verbose_name='Название')
+    price = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Цена')
+    author_name = models.CharField(max_length=255, verbose_name='Автор')
     # Владелец related_name -
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
-                              related_name='my_books')
+                              related_name='my_books', verbose_name='Владелец')
 
    #Читатель through UserBookRelation- Через какую модель идет связь ManyToManyField
     #У читателя есть книгИ, у книги есть читателИ
     readers = models.ManyToManyField(User, through='UserBookRelation',
-                                     related_name='books')
-    discount =models.DecimalField(max_digits=2, decimal_places=0, null=True)
-    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
-
+                                     related_name='books', verbose_name='Читатели')
+    discount =models.DecimalField(max_digits=2, decimal_places=0, null=True, verbose_name='Скидка')
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None,
+                                 null=True, verbose_name='Рейтинг')
+    # rating = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True, verbose_name='Рейтинг')
 
     class Meta:
         verbose_name = 'Книги'
@@ -47,8 +47,8 @@ class UserBookRelation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     like = models.BooleanField(default=False)
-    in_bookmarks = models.BooleanField(default=False)
-    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
+    in_bookmarks = models.BooleanField(default=False, verbose_name='В закладках')
+    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True, verbose_name='Рейтинг')
 
     class Meta:
         verbose_name = 'Лайки, закладки, рейтинг'
@@ -56,7 +56,7 @@ class UserBookRelation(models.Model):
 
     def __str__(self):
         return f'{self.user.username}: {self.book.name}, Like: {self.like}, ' \
-               f' in_bookmarks {self.in_bookmarks}, RATE: {self.rate}'
+               f' В закладках: {self.in_bookmarks}, Рейтинг: {self.rate}'
 
     def save(self, *args, **kwargs):
         from store.logic import set_rating
