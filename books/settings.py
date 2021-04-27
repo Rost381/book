@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     'store.apps.StoreConfig',
+    'drf_yasg',
 ]
 
 INTERNAL_IPS = [
