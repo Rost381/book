@@ -1,2 +1,2 @@
-## Training Django project
-#Тренировочная реализация API модуля книжного магазина на DRF
+## Bookstore API DRF
+Реализация API модуля книжного магазина на DRF
